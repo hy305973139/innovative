@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.innovative.dao.DemandDao">
+    <resultMap id="demandMap" type="Demand">
+        <id property="id" column="id" />
+        <result property="name" column="name"/>
+        <result property="number" column="number"/>
+        <result property="iphone" column="iphone"/>
+        <result property="createDate" column="create_date"/>
+        <result property="cteateBy" column="create_by"/>
+        <result property="lateDate" column="late_date"/>
+        <result property="lateBy" column="late_by"/>
+        <result property="bgd" column="bgd"/>
+        <result property="demandd" column="demandd"/>
+        <result property="interestpg" column="interestpg"/>
+        <result property="ninterestpg" column="ninterestpg"/>
+        <result property="gjc" column="gjc" typeHandler="com.innovative.mybatisHandler.ArrayTypeHandler"/>
+        <result property="hzms" column="hzms"/>
+        <result property="hzrequest" column="hzrequest"/>
+        <result property="productm" column="productm"/>
+        <result property="productDate" column="product_date"/>
+        <result property="bz" column="bz"/>
+        <result property="checkName" column="check_name"/>
+        <result property="ddmj" column="ddmj"/>
+        <result property="option" column="option"/>
+        <result property="status" column="status"/>
+        <result property="path" column="file"/>
+        <result property="xqf" column="xqf"/>
+        <result property="userName" column="username" typeHandler="com.innovative.mybatisHandler.ArrayTypeHandler"/>
+    </resultMap>
+
+    <!--根据id获取内容详情-->
+    <select id="getDemand" resultMap="demandMap">
+        SELECT * FROM "xacx_demand" WHERE "id" =  #{id};
+    </select>
+    <!--根据ID修改内容-->
+    <update id="updateDemand" parameterType="Demand">
+        UPDATE  "xacx_demand" SET "status"='1',"option" =#{option} WHERE id=#{id}
+    </update>
+    <!-- 新增-->
+    <insert id="addDemand" parameterType="Demand">
+        <selectKey resultType="int" keyProperty="id" order="AFTER">
+            SELECT currval('xacx_demand_id_seq'::regclass)
+        </selectKey>
+        INSERT  INTO "xacx_demand"
+        ("name","number","iphone","create_date","create_by","late_date","late_by","bgd","demandd","interestpg","ninterestpg",
+        "hzms","hzrequest","productm","product_date","bz","check_name","ddmj","option","file","xqf","gjc","username")
+        VALUES(#{name},#{number},#{iphone},now(),#{cteateBy},now(),#{lateBy},#{bgd},#{demandd},#{interestpg},#{ninterestpg},
+        #{hzms},#{hzrequest},#{productm},#{productDate},#{bz},#{checkName},#{ddmj},#{option},#{path},#{xqf},
+        <choose>
+            <when test="gjc != null">
+                <foreach item="gjc" collection="gjc" separator="," open="'{" close="}'," index="">
+                    ${gjc}
+                </foreach>
+            </when>
+            <otherwise>'{},'</otherwise>
+        </choose>
+        <choose>
+            <when test="userName != null">
+                <foreach item="userName" collection="userName" separator="," open="'{" close="}'" index="">
+                    ${userName}
+                </foreach>
+            </when>
+            <otherwise>'{}'</otherwise>
+        </choose>
+        )
+    </insert>
+    <!--查询总条数-->
+    <select id="getTotalCount" resultType="int">
+        SELECT count(1) FROM "xacx_demand"
+    </select>
+    <!--根据查询条件获取列表-->
+    <select id="getDemandList" resultMap="demandMap">
+        SELECT * FROM (SELECT * FROM "xacx_demand"
+        <where>
+        status='1'
+        </where>
+        )B
+        <where>
+         B.ddmj='0' or B.ddmj='1'and username @> '${userName}'
+        </where>
+        limit #{pageSize} offset #{startIndex}
+    </select>
+    <!--根据查询条件获取列表-->
+    <select id="getQueryList" resultMap="demandMap">
+       SELECT * FROM "xacx_demand"
+        <where>
+            create_by=#{userName}
+        </where>
+        limit #{pageSize} offset #{startIndex}
+    </select>
+    <!--查询总条数-->
+    <select id="getTotalCounts" resultType="int">
+        SELECT count(1) FROM "xacx_demand"
+        <where>
+            create_by=#{userName}
+        </where>
+    </select>
+
+</mapper>

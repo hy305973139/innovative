@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.innovative.dao.PoiDao">
+
+
+
+
+
+
+	<!--添加专家信息-->
+	<insert id="addPoiExpert" parameterType="Expert">
+		INSERT INTO "Experts"
+		( "Avatar", "Contact", "CooperationStatus", "CreatedAt", "CreatedBy", "Deleted", "DeletedAt", "DeletedBy", "Education", "HFactor", "IsActive", "JobTitle", "Name", "Rank", "ResearchAchievement", "ResearchDirection", "Resume", "RowVersion", "Sectors", "Tags", "Unit", "UpdatedAt", "UpdatedBy", "File")
+	VALUES ( #{avatar}, #{contact}, #{cooperationStatus}, #{createdAt}, #{createdBy}, #{deleted}, #{createdAt}, #{deletedBy}, #{education}, #{hFactor}, #{isActive}, #{jobTitle}, #{name}, #{rank}, #{researchAchievement}, #{researchDirection}, #{resume}, #{rowVersion}, '${sectors}',  #{unit}, #{createdAt}, #{updatedBy}, '${file}')
+	</insert>
+
+
+<!--批量添加专家信息-->
+	<insert id="batchAddPoiExpert" parameterType="java.util.List">
+		INSERT INTO "Experts"
+		( "Id","Avatar", "Contact", "CooperationStatus", "CreatedAt", "CreatedBy", "Deleted", "DeletedAt", "DeletedBy", "Education", "HFactor", "IsActive", "JobTitle", "Name", "Rank", "ResearchAchievement", "ResearchDirection", "Resume", "RowVersion", "Sectors","Tags",  "Unit", "UpdatedAt", "UpdatedBy", "File")
+		VALUES 
+	<foreach collection="urllist" item="item" open="(" separator="),(" close=")">
+		 <foreach item="v" index="key" collection="item.values" >
+          		#{v.id},#{v.avatar}, #{v.contact}, ${v.cooperationStatus}, now(), #{v.createdBy}, false, now(), #{v.deletedBy}, #{v.education}, ${v.hFactor}, true, #{v.jobTitle}, #{v.name}, ${v.rank}, #{v.researchAchievement}, #{v.researchDirection}, #{v.resume}, ${v.rowVersion},
+          		 
+			       <choose>
+					<when test="v.sectors != null">
+						<foreach item="sector" collection="v.sectors" separator="," open="'{" close="}'," index="">  
+					      ${sector}
+					    </foreach>  
+					</when>
+					<otherwise>'{}',</otherwise>
+				</choose>
+				<choose>
+					<when test="v.tags != null">
+						<foreach item="tag" collection="v.tags" separator="," open="'{" close="}'," index="">  
+					      ${tag}
+					    </foreach>  
+					</when>
+					<otherwise>'{}',</otherwise>
+				</choose>
+          		   #{v.unit}, now(), #{v.updatedBy}, #{v.file}
+          		
+    	</foreach>  
+        
+    </foreach>  
+	
+	</insert>
+	
+	
+	<!--批量添加行业协会-->
+	<insert id="batchAddPoiAssociation" parameterType="java.util.List">
+		INSERT INTO "Associations" 
+		("Id", "AvailableResources", "Contact", "CooperationStatus", "CreatedAt", "CreatedBy", "Deleted", 
+		"DeletedAt", "DeletedBy", "Duration", "Introduction", "IsActive", "Logo", 
+		"Name", "Nature", "Rank", "RowVersion", "Sectors", "Tags", "UpdatedAt", "UpdatedBy", "Website")
+		 VALUES
+		<foreach collection="urllist" item="item" open="(" separator="),(" close=")">
+			 <foreach item="v" index="key" collection="item.values">
+	          		#{v.id},#{v.availableResources}, #{v.contact}, #{v.cooperationStatus}, now(), #{v.createdBy}, false, 
+	          		#{v.deletedAt}, #{v.deletedBy}, #{v.duration}, #{v.introduction}, true, #{v.logo},
+	          		 #{v.name}, #{v.nature}, #{v.rank}, #{v.rowVersion}, 
+				       <choose>
+						<when test="v.sectors != null">
+							<foreach item="sector" collection="v.sectors" separator="," open="'{" close="}'," index="">  
+						      ${sector}
+						    </foreach>  
+						</when>
+						<otherwise>'{}',</otherwise>
+					</choose>
+					<choose>
+						<when test="v.tags != null">
+							<foreach item="tag" collection="v.tags" separator="," open="'{" close="}'," index="">  
+						      ${tag}
+						    </foreach>  
+						</when>
+						<otherwise>'{}',</otherwise>
+					</choose>
+	          		   now(), #{v.updatedBy}, #{v.website}
+	          		
+	    	</foreach>  
+	        
+	    </foreach>  
+	
+	</insert>
+	
+	
+	<!--批量添加仪器设备-->
+	<insert id="batchAddPoiEquipment" parameterType="java.util.List">
+		INSERT INTO "Equipments" ("Id", "Contact", "CreatedAt", "CreatedBy", "Deleted", "DeletedAt", "DeletedBy", "Introduction", 
+		"IsActive", "Manufacturer", "Name", "Picture", "PurchasedAt", "Rank", "RowVersion",
+		 "Sectors", "Sharing","State", 
+		 "Tags", "Unit", "UpdatedAt", "UpdatedBy", "File") VALUES 
+
+		<foreach collection="urllist" item="item" open="(" separator="),(" close=")">
+			 <foreach item="v" index="key" collection="item.values">
+	          		#{v.id},#{v.contact}, now(),#{v.createdBy}, false, null, null, #{v.introduction}, 
+	          		true, #{v.manufacturer}, #{v.name}, #{v.picture}, #{v.purchasedAt}, #{v.rank},#{v.rowVersion},
+				       <choose>
+						<when test="v.sectors != null">
+							<foreach item="sector" collection="v.sectors" separator="," open="'{" close="}'," index="">  
+						      ${sector}
+						    </foreach>  
+						</when>
+						<otherwise>'{}',</otherwise>
+					</choose>
+					
+					#{v.sharing},#{v.state}, 
+	          		 
+	          		<choose>
+						<when test="v.tags != null">
+							<foreach item="tag" collection="v.tags" separator="," open="'{" close="}'," index="">
+						      ${tag}
+						    </foreach>  
+						</when>
+						<otherwise>'{}',</otherwise>
+					</choose>
+	          		 #{v.unit}, now(), #{v.updatedBy}, #{v.file}
+	          		
+	    	</foreach>  
+	        
+	    </foreach>  
+	
+	</insert>
+
+
+	
+	<!--批量添加组织机构-->
+	<insert id="batchAddPoiOrganization" parameterType="java.util.List">
+		
+	INSERT INTO "Organizations" 
+	("Id", "Achievements", "Contact", "CooperationStatus", "CreatedAt", "CreatedBy", "Deleted", "DeletedAt", "DeletedBy",
+	 "Introduction", "IsActive", "Logo", "Name", "Nature", "Rank", "RowVersion",
+	  "Sectors", "Tags", "UpdatedAt", "UpdatedBy", "Website", "File") VALUES 
+
+		<foreach collection="urllist" item="item" open="(" separator="),(" close=")">
+			 <foreach item="v" index="key" collection="item.values">
+	          		#{v.id},#{v.achievements}, #{v.contact}, #{v.cooperationStatus}, now(), #{v.createdBy}, false, #{v.deletedAt}, #{v.deletedBy},
+	          		#{v.introduction}, true, #{v.logo}, #{v.name}, #{v.nature}, #{v.rank},#{v.rowVersion},
+				       <choose>
+						<when test="v.sectors != null">
+							<foreach item="sector" collection="v.sectors" separator="," open="'{" close="}'," index="">  
+						      ${sector}
+						    </foreach>  
+						</when>
+						<otherwise>'{}',</otherwise>
+					</choose>
+					<choose>
+						<when test="v.tags != null">
+							<foreach item="tag" collection="v.tags" separator="," open="'{" close="}'," index="">  
+						      ${tag}
+						    </foreach>  
+						</when>
+						<otherwise>'{}',</otherwise>
+					</choose>
+	          		now(), #{v.updatedBy}, #{v.website}, #{v.file}
+	          		
+	    	</foreach>  
+	        
+	    </foreach>  
+	
+	</insert>
+	
+	
+	<!--批量添加方案-->
+	<insert id="batchAddSolution" parameterType="java.util.List">
+		INSERT INTO "Solutions" 
+		("Id", "Content", "CreatedAt", "CreatedBy", "Deleted", "DeletedAt", "DeletedBy", "IsActive", "Name",
+		 "Pictures", "Rank", "RowVersion", "Sectors", "Summary", "Tags", "UpdatedAt", "UpdatedBy", "File") 
+		 VALUES 
+
+		<foreach collection="urllist" item="item" open="(" separator="),(" close=")">
+			 <foreach item="v" index="key" collection="item.values">
+	          		#{v.id},#{v.content},now(), #{v.createdBy},false, #{v.deletedAt}, #{v.deletedBy},true, #{v.name},
+	          		#{v.pictures}, #{v.rank}, #{v.rowVersion},
+				       <choose>
+						<when test="v.sectors != null">
+							<foreach item="sector" collection="v.sectors" separator="," open="'{" close="}'," index="">  
+						      ${sector}
+						    </foreach>  
+						</when>
+						<otherwise>'{}',</otherwise>
+					</choose>
+					#{v.summary}, 
+					<choose>
+						<when test="v.tags != null">
+							<foreach item="tag" collection="v.tags" separator="," open="'{" close="}'," index="">  
+						      ${tag}
+						    </foreach>  
+						</when>
+						<otherwise>'{}',</otherwise>
+					</choose>
+	          		now(), #{v.updatedBy}, #{v.file}
+	    	</foreach>  
+	    </foreach>  
+	</insert>
+	
+	
+		<!--批量添加技术报告-->
+	<insert id="batchAddTechnicalReports" parameterType="java.util.List">
+		
+		INSERT INTO "TechnicalReports" 
+		("Id", "Content", "CreatedAt", "CreatedBy", "Deleted", "DeletedAt", "DeletedBy", "IsActive", "Name",
+		 	"Pictures", "Rank", "RowVersion", "Sectors", "Summary", "Tags", "UpdatedAt", "UpdatedBy", "File") VALUES
+
+		<foreach collection="urllist" item="item" open="(" separator="),(" close=")">
+			 <foreach item="v" index="key" collection="item.values">
+	          		#{v.id},#{v.content},now(), #{v.createdBy},false, #{v.deletedAt}, #{v.deletedBy},true, #{v.name},
+	          		#{v.pictures}, #{v.rank}, #{v.rowVersion},
+				       <choose>
+						<when test="v.sectors != null">
+							<foreach item="sector" collection="v.sectors" separator="," open="'{" close="}'," index="">  
+						      ${sector}
+						    </foreach>  
+						</when>
+						<otherwise>'{}',</otherwise>
+					</choose>
+					#{v.summary}, 
+					<choose>
+						<when test="v.tags != null">
+							<foreach item="tag" collection="v.tags" separator="," open="'{" close="}'," index="">  
+						      ${tag}
+						    </foreach>  
+						</when>
+						<otherwise>'{}',</otherwise>
+					</choose>
+	          		now(), #{v.updatedBy}, #{v.file}
+	    	</foreach>  
+	    </foreach>  
+	</insert>
+
+
+	
+
+</mapper>

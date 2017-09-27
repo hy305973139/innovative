@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.innovative.dao.RoleDao">
+	
+
+
+    <!--根据查询条件获取列表-->
+    <select id="getRoleList" resultType="Role">
+        SELECT "RoleName","RoleId","P_RoleId","Description"
+        FROM "app_role"
+        limit #{pageSize} offset #{startIndex}
+    </select>
+    <!-- 获取总数 -->
+     <select id="getTotalCount" resultType="int">
+        SELECT count(*)
+        FROM "app_role"
+    </select>
+    
+    	<!--添加角色-->
+	<insert id="addRole" parameterType="Role">
+		INSERT INTO "app_role" ("RoleName", "RoleId", "P_RoleId", "CreateAt", "Description") 
+		VALUES 
+		(#{roleName},#{roleId},#{p_RoleId},now(),#{description})
+	</insert>
+	
+	
+
+
+</mapper>

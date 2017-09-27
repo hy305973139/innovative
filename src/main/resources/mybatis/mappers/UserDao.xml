@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.innovative.dao.UserDao">
+
+<resultMap id="userMap" type="User">
+	  <id property="userId" column="pernr" />
+	  <result property="itcode" column="itcode"/><!-- itcode -->
+	  <result property="userIntegration" column="userIntegration"/><!-- 用户积分 -->
+	  <result property="usrid_u" column="usrid_u"/><!-- 用户名拼音 -->
+	  <result property="nachn" column="nachn"/><!-- 用户姓 -->
+	  <result property="vorna" column="vorna"/><!-- //用户名 -->
+	  <result property="gesch" column="gesch"/><!-- 性别 -->
+	  <result property="teleno" column="teleno"/><!-- 电话 -->
+	  <result property="mobile" column="mobile"/><!-- 移动电话 -->
+	  <result property="mail" column="mail"/><!-- 电子邮件 -->
+	  <result property="werks" column="werks"/><!-- 人事范围 -->
+	  <result property="pbtxt" column="pbtxt"/><!-- 电子邮件 -->
+	  <result property="plans" column="plans"/><!-- 职位代码 -->
+	  <result property="stext" column="stext"/><!-- 职位名称 -->
+	  <result property="orgeh" column="orgeh"/><!-- 部门编号 --> 
+	  <result property="dstext" column="dstext"/><!-- 部门名称 -->
+	  <result property="stat2" column="stat2"/><!-- 是否离职（0代表离职，3代表在职） -->
+	  <result property="operaction" column="operaction"/><!-- 操作操作类型 -->
+	  <result property="glstdm" column="glstdm"/><!-- 管理实体代码 -->
+	  <result property="glst" column="glst"/><!-- 管理实体-->
+	  <result property="lzrq" column="lzrq"/><!-- 离职日期 -->
+	</resultMap> 
+
+ <!--添加用户信息-->
+	<!-- <insert id="insertUser" parameterType="map">
+		INSERT INTO "xacx_user"
+		 ("UserId", "UserName",   "UserPost", "CreateAt", "UserSex", "UserAge","Department","JobNumber")
+		VALUES 
+		(#{userId}, #{userName},  #{userPost}, now(),#{userSex}, #{userAge},#{department},#{jobNumber})
+	</insert> -->
+
+
+	<!--批量添加用户信息-->
+	<!-- <insert id="insertUserList" parameterType="java.util.List">
+			INSERT INTO "xacx_user"
+		 ("UserId", "UserName",   "UserPost", "CreateAt", "UserSex", "UserAge","Department","JobNumber")
+		VALUES 
+		 <foreach collection="userList" item="item" open="(" separator="),(" close=")">
+	        #{item.userId}, #{item.userName},  #{item.userPost}, now(),#{item.userSex}, #{item.userAge}, #{item.department},#{item.jobNumber}
+	    </foreach>  
+		
+	</insert> -->
+
+	
+	 <!--根据id获取用户信息-->
+	<select id="getUser" resultMap="userMap">
+		SELECT * FROM "xacx_user"  
+		  WHERE "pernr" =  #{userId};
+	</select>
+	
+	 <!--根据id与角色id查用户是否拥有该角色-->
+	<select id="getUserRole" resultType="int">
+		SELECT count(*) FROM  "app_userrole"
+		  WHERE "UserId" =  #{userId} and "RoleId" = #{roleId}
+	</select>
+	
+	 <!--根据工号获取用户信息-->
+	<!-- <select id="getUserByJobNumber" resultType="User">
+		SELECT * FROM "xacx_user"  
+		  WHERE "JobNumber" =  #{jobNumber};
+	</select> -->
+
+
+	 <!--根据姓名模糊匹配获取用户信息-->
+	<select id="getUserByName" resultMap="userMap">
+		select * from "xacx_user"  where nachn||vorna like  #{name}
+	</select>
+	
+	 <!--根据员工账号获取全称-->
+	<select id="getQcName" resultType="map">
+		select u.pernr,u.orgeh,e.PATH from xacx_user u left join  v_xacx_user_org e on u.orgeh = e.orgeh where pernr = #{pernr}
+	</select>
+	
+	
+	
+	
+	<!--修改用户信息-->
+	<!-- <update id="updateUser" parameterType="User">
+		UPDATE "xacx_user"
+		<set>
+			<if test="userState!=null and userState!=''">
+				"UserState" = #{userState},
+			</if>
+			<if test="updateBy!=null and updateBy!=''">
+				"UpdateBy" = #{updateBy},
+			</if>
+				"UpdateAt" = now()
+		</set>
+		where "UserId" = #{userId}
+	</update> -->
+	
+		<!--根据查询条件获取列表-->
+	<select id="getUserList" resultMap="userMap">
+		SELECT * FROM "xacx_user"
+		limit #{pageSize} offset #{startIndex}
+	</select>
+
+	<!--查询行业领域搜索条件的总条数-->
+	<select id="getTotalCount" resultType="int">
+		SELECT count(1) FROM "xacx_user"
+	</select>
+
+ <!-- 根据用户id与角色id获取用户角色信息是否存在 -->
+<!-- 	<select id="getUserRole" resultType="int">
+		SELECT count(*) FROM "app_userrole"  
+		  WHERE "UserId" =  #{userId} and "RoleId" = #{roleId};
+	</select> -->
+	
+ 	<!--添加用户角色-->
+	<insert id="insertUserRole" parameterType="map">
+		INSERT INTO "app_userrole" ("UserId", "RoleId", "CreateAt", "CreateBy") VALUES 
+		(#{userId}, #{roleId}, now(),#{createBy})
+	</insert>
+	
+		
+ 	<!--给一个用户赋值多个角色-->
+	<insert id="insertUserRoles" parameterType="User">
+		INSERT INTO "app_userrole" ("UserId", "RoleId", "CreateAt", "CreateBy") VALUES 
+		
+		<foreach collection="roleIds" item="item" open="(" separator="),(" close=")">
+			#{userId}, #{item}, now(),#{createBy}
+		</foreach>
+	</insert>
+	
+	<!-- deleteUserRoles -->
+	
+	 <!--删除用户对应的角色-->
+	<delete id="deleteUserRoles" parameterType="map">
+		delete from "app_userrole"
+		<where>
+			 "UserId"=#{userId}
+		</where>
+	</delete>
+
+	
+
+</mapper>

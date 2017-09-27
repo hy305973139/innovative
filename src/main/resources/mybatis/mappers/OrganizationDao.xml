@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.innovative.dao.OrganizationDao">
+	<resultMap id="organizationMap" type="Organization">
+		<id property="id" column="id" />
+	  <result property="achievements" column="achievements"/>
+	  <result property="contact" column="contact"/>
+	  <result property="cooperationStatus" column="cooperationStatus"/>
+	  <result property="createdBy" column="createdBy"/>
+	  <result property="createdAt" column="createdAt"/>
+	  <result property="deleted" column="deleted"/>
+	  <result property="deletedAt" column="deletedAt"/>
+	  <result property="deletedBy" column="deletedBy"/>
+	  <result property="introduction" column="introduction"/>
+	  <result property="logo" column="logo"/>
+	  <result property="isActive" column="isActive"/>
+	  <result property="name" column="name"/>
+	  <result property="nature" column="nature"/>
+	  <result property="rank" column="rank"/>
+	   <result property="rowVersion" column="rowVersion"/>
+	  <result property="website" column="website"/>
+	  <result property="updatedAt" column="updatedAt"/>
+	  <result property="updatedBy" column="updatedBy"/>
+	  <result property="file" column="file"/>
+	  <result property="tags" column="tags" typeHandler="com.innovative.mybatisHandler.ArrayTypeHandler"/>
+	  <result property="sectors" column="sectors" typeHandler="com.innovative.mybatisHandler.ArrayTypeHandler"/>
+	   <collection property="filelist" ofType="FileBean">  
+           <result property="refId" column="refId"/>
+           <result property="refType" column="refType"/>
+	  	   <result property="url" column="url"/>
+	  	   <result property="fileName" column="filename"/>
+       </collection> 
+	</resultMap> 
+
+    <!--根据id获取机构详情-->
+	<select id="getOrganization" resultMap="organizationMap">
+		SELECT * FROM "Organizations"  e LEFT JOIN "xacx_file" f on f."refId" = e."Id" and f."refType" = 'addunionFile' and f."sign" = 'add'
+		WHERE "Id" =  #{id};
+	</select>
+
+
+
+	<!--根据查询条件获取列表-->
+	<select id="getOrganizationList"  resultMap="organizationMap">
+		SELECT * FROM "Organizations"  e LEFT JOIN "xacx_file" f on f."refId" = e."Id" and f."refType" = 'addunionFile' and f."sign" = 'add'
+		<where>
+			<!-- <if test="sectors!=null and sectors!=''">
+				 "Sectors" @> '${sectors}'
+			</if> -->
+			 e."Deleted" = 'f' AND e."IsActive" = 't'
+		</where>
+		order by e."UpdatedAt"  DESC 
+		limit #{pageSize} offset #{startIndex}
+	</select>
+
+
+	<!--查询行业领域搜索条件的总条数-->
+	<select id="getTotalCount" resultType="int">
+		SELECT count(1) FROM "Organizations"
+		<where>
+			<!-- <if test="sectors!=null and sectors!=''">
+				"Sectors" @> '${sectors}'
+			</if> -->
+			 "Deleted" = 'f' AND "IsActive" = 't'
+		</where>
+	</select>
+
+
+	<!--添加机构信息-->
+	<insert id="addOrganization" parameterType="map">
+		INSERT INTO "Organizations"
+		( "Id","Achievements", "Contact", "CooperationStatus", "CreatedAt", "CreatedBy", "Deleted", "DeletedAt", "DeletedBy", "Introduction", "IsActive", "Logo", "Name", "Nature", "Rank", "RowVersion", "Sectors", "Tags", "UpdatedAt", "UpdatedBy", "Website", "File")
+	VALUES (#{id}, #{achievements}, #{contact}, #{cooperationStatus}, now(), #{createdBy}, false, #{createdAt}, #{deletedBy}, #{introduction}, true, '${logo}', #{name}, #{nature}, #{rank}, #{rowVersion},
+	 <choose>
+		<when test="sectors != null">
+			<foreach item="sector" collection="sectors" separator="," open="'{" close="}'," index="">  
+		      ${sector}
+		    </foreach>  
+		</when>
+		<otherwise>'{}',</otherwise>
+	</choose>
+	<choose>
+		<when test="tags != null">
+			<foreach item="tag" collection="tags" separator="," open="'{" close="}'," index="">  
+		      ${tag}
+		    </foreach>  
+		</when>
+		<otherwise>'{}',</otherwise>
+	</choose>
+	  now(), #{createdBy}, #{website}, '${file}')
+	</insert>
+
+
+
+
+
+	<!--修改机构信息-->
+	<update id="updateOrganization" parameterType="map">
+		UPDATE "Organizations"
+		<set>
+			<if test="name!=null and name!=''">
+				"Name"=#{name},
+			</if>
+			<if test="introduction!=null and introduction!=''">
+				"Introduction"=#{introduction},
+			</if>
+			<if test="nature!=null and nature!=''">
+				"Nature"=#{nature},
+			</if>
+			<if test="achievements!=null and achievements!=''">
+				"Achievements"=#{achievements},
+			</if>
+			<if test="cooperationStatus!=null and cooperationStatus!=''">
+				"CooperationStatus"=#{cooperationStatus},
+			</if>
+			<if test="contact!=null and contact!=''">
+				"Contact"=#{contact},
+			</if>
+			<if test="website!=null and website!=''">
+				"Website"=#{website},
+			</if>
+			<if test="sectors!=null and sectors!=''">
+				"Sectors"=
+				<choose>
+					<when test="sectors != null">
+						<foreach item="sector" collection="sectors" separator="," open="'{" close="}'," index="">  
+					      ${sector}
+					    </foreach>  
+					</when>
+					<otherwise>null,</otherwise>
+				</choose>
+			</if>
+			<if test="tags!=null and tags!=''">
+				"Tags"=
+				<choose>
+					<when test="tags != null">
+						<foreach item="tag" collection="tags" separator="," open="'{" close="}'," index="">  
+					      ${tag}
+					    </foreach>  
+					</when>
+				</choose>
+			</if>
+			<if test="rank!=null and rank!=''">
+				"Rank"=#{rank},
+			</if>
+			<if test="isActive!=null and isActive!=''">
+				"IsActive"=#{isActive},
+			</if>
+			<!-- <if test="updateId!=null and updateId!=''">
+				"Id"=#{updateId},
+			</if> -->
+			<if test="updatedBy!=null and updatedBy!=''">
+				"UpdatedBy"=#{updatedBy},
+			</if>
+				"UpdatedAt"=now()
+		</set>
+		where "Id"=#{id}
+	</update>
+
+
+
+
+
+	
+
+</mapper>
